@@ -39,5 +39,5 @@ jobs:
         uses: phoenix-actions/test-reporting@v15
         with:
           name: Java Playwright Test Report
-          path: target/reports/surefire.html
+          path: target/playwright-report
           reporter: html
