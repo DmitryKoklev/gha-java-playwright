@@ -1,54 +1,47 @@
-name: Display HTML Test Report (Java Playwright)
+name: Show Playwright Reports
 
-on:
-  push:
-    branches: [ main ]
+on: push
 
 jobs:
-  test:
+  tests:
+    name: Show Playwright Reports
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Set up Java environment
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
+          cache: maven
 
-      # Cache Maven dependencies to speed up builds
-      - name: Cache Maven dependencies
+      - name: Restore Maven dependencies cache
         uses: actions/cache@v4
         with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-m2-
+            ${{ runner.os }}-maven-
 
-      # Run the Playwright tests
-      - name: Run Playwright tests
-        run: mvn clean test
+      - name: Build & Install
+        run: mvn -B install -D skipTests --no-transfer-progress
 
-      # Upload all potential report directories (for debugging and visibility)
-      - name: Upload all reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: all-test-reports
-          path: |
-            target/reports
-            target/surefire-reports
-            target/playwright-report
+      - name: Install Playwright Browsers
+        run: mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps"
 
-      # Display the Surefire HTML report if it exists
-      - name: Publish HTML test report
-        if: always()
+      - name: Run tests
+        run: mvn test surefire-report:report
+
+      - name: Publish Test report  # Displays the Surefire test report in the GitHub Actions UI.
         uses: phoenix-actions/test-reporting@v15
         with:
-          name: Java Playwright Test Report
-          path: target/surefire-reports/TEST*.xml
-          reporter: html
+          name: 'Publish test report (surefire)'  # The title of the report in the summary.
+          path: target/surefire-reports/TEST*.xml  # Specifies the test results file(s).
+          reporter: java-junit  # Specifies the report format.
+          list-tests: all  # Displays details of all tests in the summary.
+          list-suites: all  # Displays test suite details.
+          fail-on-error: true  # Fails the workflow if the report contains errors.
+          output-to: 'step-summary'  # Displays the report in the GitHub Actions summary tab.
