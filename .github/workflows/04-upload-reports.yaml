@@ -33,11 +33,22 @@ jobs:
       - name: Run Playwright tests
         run: mvn clean test
 
-      # Publish the generated HTML test report
+      # Upload all potential report directories (for debugging and visibility)
+      - name: Upload all reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-test-reports
+          path: |
+            target/reports
+            target/surefire-reports
+            target/playwright-report
+
+      # Display the Surefire HTML report if it exists
       - name: Publish HTML test report
         if: always()
         uses: phoenix-actions/test-reporting@v15
         with:
           name: Java Playwright Test Report
-          path: target/reports/surefire.html
+          path: target/surefire-reports/surefire.html
           reporter: html
