@@ -1,4 +1,4 @@
-name: Upload Test Artifacts (Java )
+name: Display HTML Test Report (Java Playwright)
 
 on:
   push:
@@ -29,16 +29,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
-      # Build the project and run Playwright tests
+      # Run the Playwright tests
       - name: Run Playwright tests
         run: mvn clean test
 
-      # Upload test reports as artifacts to GitHub Actions
-      - name: Upload test reports
+      # Upload HTML test report as a GitHub Pages-like artifact
+      - name: Publish HTML test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: phoenix-actions/test-reporting@v15
         with:
-          name: java-playwright-reports
-          path: |
-            target/reports
-            target/surefire-reports
+          name: Java Playwright Test Report
+          path: target/reports/surefire.html
+          reporter: html
