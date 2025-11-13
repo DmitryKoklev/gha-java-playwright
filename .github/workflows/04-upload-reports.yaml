@@ -33,11 +33,11 @@ jobs:
       - name: Run Playwright tests
         run: mvn clean test
 
-      # Upload HTML test report as a GitHub Pages-like artifact
+      # Publish the generated HTML test report
       - name: Publish HTML test report
         if: always()
         uses: phoenix-actions/test-reporting@v15
         with:
           name: Java Playwright Test Report
-          path: target/playwright-report
+          path: target/reports/surefire.html
           reporter: html
