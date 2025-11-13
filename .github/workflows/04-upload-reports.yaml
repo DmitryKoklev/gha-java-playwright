@@ -1,4 +1,4 @@
-name: Upload Test Artifacts (Java Playwright)
+name: Upload Test Artifacts (Java )
 
 on:
   push:
